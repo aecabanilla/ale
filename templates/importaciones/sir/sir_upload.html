@@ -1,0 +1,48 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block titulos %}
+    IMPORTAR ARCHIVO SIR
+{% endblock %}
+
+{% block content %}
+
+    <form enctype="multipart/form-data" method="post">{% csrf_token %}
+
+        {% include '../alert.html' %}
+
+        <div class="row">
+            {% if alert_type != 'warning' %}
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="label-archivo">Archivo</span>
+                    </div>
+                    <input type="file" class="form-control" name="sir_file" id="inputFile" aria-describedby="label-archivo1" />
+                </div>
+            {% endif %}
+        </div>
+
+        {% include '../spinner.html' %}
+
+        <div class="row">
+            <div class="col-md-12">
+                {% if alert_type != 'warning' %}
+                    <button class="btn btn-primary" id="btn-subir" type="submit" name="subir">Subir</button>
+                {% endif %}
+                {% if alert_type == 'warning' %}
+                    <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+                    <button class="btn btn-secondary" type="submit" name="cancelar">Cancelar</button>
+                    <button class="btn btn-primary" type="submit" name="confirmar">Confirmar</button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
+{% block javascript %}
+
+    $('#btn-subir').click(function(){
+        $('#spinner-div').removeClass('d-none');
+    });
+
+{% endblock %}

@@ -1,0 +1,20 @@
+<nav aria-label="navigation">
+
+    {% if paginator.paginator.count > 0 %}
+        <span>{{ paginator.paginator.count }} resultado{% if paginator.paginator.count != 1 %}s{% endif %}</span>
+
+        <ul class="pagination justify-content-center flex-wrap">
+            {% if paginator.has_previous %}
+                <li class="page-item"><a class="page-link" href="?{{ query }}&page={{ paginator.previous_page_number }}">Anterior</a></li>
+            {% endif %}
+
+            {% for item in paginator_dict %}
+                <li class="page-item {% if item.disabled %}disabled{% endif %} {% if page_number == item.i %}active{% endif %}"><a class="page-link" href="?{{ query }}&page={{ item.i }}">{{ item.i }}</a></li>
+            {% endfor %}
+
+            {% if paginator.has_next %}
+                <li class="page-item"><a class="page-link" href="?{{ query }}&page={{ paginator.next_page_number }}">Siguiente</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav>

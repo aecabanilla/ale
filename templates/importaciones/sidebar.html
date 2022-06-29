@@ -1,0 +1,74 @@
+{% load static %}
+<!-- Sidebar -->
+<ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
+    <!-- Sidebar - NIC Argentina -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/app/dashboard/">
+        <div class="sidebar-brand-icon rotate-n-15">
+        </div>
+        <div class="sidebar-brand-text mx-3"><img src="{% static 'img/logo_nic.png' %}" id="logo-img" /></div>
+    </a>
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item active">
+        <a class="nav-link" href="/app/dashboard/">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span></a>
+    </li>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+     <!-- Nav Item - Menu ver información-->
+     <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
+            aria-expanded="true" aria-controls="collapseOne">
+            <i class="fa fa-info-circle"></i>
+            <span>Ver información</span>
+        </a>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Seleccione :</h6>
+                <a class="collapse-item" href="{% url 'decidir_card' %}">Decidir Tarjetas</a>
+                <a class="collapse-item" href="{% url 'decidir_pmc' %}">Decidir PMC</a>
+                <a class="collapse-item" href="{% url 'gire' %}">Gire</a>
+                <a class="collapse-item" href="{% url 'sir' %}">Sir</a>
+            </div>
+        </div>
+    </li>
+    <hr class="sidebar-divider">
+    <!-- Nav Item - Menu ver archivos-->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+            aria-expanded="true" aria-controls="collapseTwo">
+            <i class="fas fa-file-upload"></i>
+            <span>Subir archivos</span>
+        </a>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Seleccione :</h6>
+                <a class="collapse-item" href="{% url 'upload_raw_decidir_card' %}">Decidir Tarjetas</a>
+                <a class="collapse-item" href="{% url 'upload_raw_decidir_pmc' %}">Decidir PMC</a>
+                <a class="collapse-item" href="{% url 'upload_raw_gire' %}">Gire</a>
+                <a class="collapse-item" href="{% url 'upload_raw_sir' %}">Sir</a>
+            </div>
+        </div>
+    </li>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
+            aria-expanded="true" aria-controls="collapseThree">
+            <i class="fas fa-file-upload"></i>
+            <span>Conciliaciones</span>
+        </a>
+        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Seleccione :</h6>
+                <a class="collapse-item" href="{% url 'conciliaciones' %}">Datos</a>
+            </div>
+        </div>
+    </li>
+       
+</ul>
+<!-- End of Sidebar -->

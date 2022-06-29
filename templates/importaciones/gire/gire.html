@@ -1,0 +1,142 @@
+{% extends '../base.html' %}
+
+{% block titulos %}
+    GIRE SA
+{% endblock %}
+
+{% block content %}
+
+    {% include '../alert.html' %}
+
+    <div class="card shadow mb-4">
+        <!-- Filters -->
+        <form id="frm-filter-decidir" method="get">
+            <div class="card-header py-3">
+                <div class="rendered-form">
+                    <div class="">
+                        <h1 access="false">Filtros</h1>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="barcode" class="formbuilder-text-label">Barcode</label>
+                            <input type="text" class="form-control" name="barcode" access="false" id="barcode" value="{{ request.GET.barcode }}">
+                            
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="fecha" class="formbuilder-text-label">Fecha</label>
+                            <input type="text" class="form-control" name="fecha" access="false" id="fecha" value="{{ request.GET.fecha }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="importe" class="formbuilder-date-label">Importe</label>
+                            <input type="text" class="form-control" name="importe" access="false" id="importe" value="{{ request.GET.importe }}">
+                        </div>
+                        <div class="form-group col-md-3 date">
+                            <label for="archivo" class="formbuilder-date-label">Archivo</label>
+                            <input type="text" class="form-control" name="archivo"  access="false" id="archivo" value="{{ request.GET.archivo }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-2">
+                            <label for="matched-check">REGISTROS en SIR</label>
+                            <input type="hidden" name="matched" id="matched"/>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="matched-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                    REGISTROS
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="matched-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="matched-check-all" name="matched-check"/> Todos</li>
+                                        <li id="matched-check"><input type="checkbox" name="matched-check" value="False" /> SIN REGISTRO</li>
+                                        <li id="matched-check"><input type="checkbox" name="matched-check" value="True"/> CON REGISTRO</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <button class="btn btn-secondary" id="btn-clean-filters" type="button"><i class="fa fa-broom"></i> Limpiar filtros</button>
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-filter"></i> Filtrar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- Filters End -->
+        <div class="row">
+            <div class="card-body">
+                <div class="table-responsive">
+                    {% if paginator.object_list|length > 0 %}
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0" id="gire-data">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Barcode</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Importe</th>
+                                    <th scope="col">Archivo</th>
+                                    <th scope="col">SIR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in paginator.object_list %}
+                                    <tr>
+                                        {% if  line.matched == False %} 
+                                            <td ><span class="color text-danger">*</span></td>
+                                        {%else%}
+                                            <td></td>
+                                        {% endif %}
+                                        <td>{{ line.barcode }}</td>
+                                        <td>{{ line.fecha }}</td>
+                                        <td>{{ line.importe }}</td>
+                                        <td>{{ line.archivo }}</td>
+                                        <td>{{ line.matched }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+
+                {% include '../paginator.html' %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+
+    $(document).ready(function() {
+        $('#btn-clean-filters').click(function () {
+            window.location.href = '?';
+        });
+
+        $('input[name=matched-check]').click(function(){
+
+            var matched = '';
+
+
+            if($(this).prop('id') == 'matched-check-all'){
+                if($('#matched-check-all').prop('checked')){
+                    $('input[name=matched-check]').prop('checked', 'checked');
+                }else{
+
+                    $('input[type=checkbox]').prop('checked', '');
+                    $('input[name=matched-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=matched-check]').each(function(){
+
+                    if($(this).prop('checked')){
+
+                        if(matched != ''){
+                            matched += ',';
+                        }
+                        matched += $(this).val();
+                    }
+                });
+
+            $('#matched').val(matched);
+        });
+    });
+
+{% endblock %}

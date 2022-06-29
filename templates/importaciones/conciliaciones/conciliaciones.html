@@ -1,0 +1,332 @@
+{% extends '../base.html' %}
+
+{% block titulos%}
+    <h1 class="h3 mb-4 text-gray-800">CONCILIACIONES</h1>
+{% endblock %}
+
+{%block content %}
+
+    {% include '../alert.html' %}
+
+    <div class="card shadow mb-4">
+        <!-- Filters -->
+        <form id="frm-filter-decidir" method="get">
+            <div class="card-header py-3">
+                <div class="rendered-form">
+                    <div class="">
+                        <h1 access="false" id="control-4446587">Filtros</h1>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="transaccion">Transacción</label>
+                            <input type="text" class="form-control" name="transaccion" id="transaccion" value="{{ request.GET.transaccion }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="memedio_de_pagodio">Medio de Pago</label>
+                            <input type="hidden" name="medio_de_pago" id="medio_de_pago" />
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="medio-de-pago-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                Medio de Pago
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="medio-de-pago-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="medio-de-pago-check-all" name="medio-de-pago-check" value="{{ p.medio_de_pago }}" /> Todos</li>
+                                        {% for p in medios_de_pago %}
+                                            <li value="{{ p.medio_de_pago }}" id="{{ p.medio_de_pago }}"><input type="checkbox" name="medio-de-pago-check" value="{{ p.medio_de_pago }}" {% if p.medio_de_pago in request.GET.medio_de_pago %}checked{% endif %} /> {{ p.medio_de_pago }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="fecha_de_pago_desde">Fecha de Pago Desde</label>
+                            <input type="date" class="form-control" name="fecha_de_pago_desde" value="{{ request.GET.fecha_de_pago_desde }}" min="2000-01-01" max="2050-01-01">
+                        </div>
+                        <div class="form-group col-md-3 date">
+                            <label for="fecha_de_pago_hasta">Fecha de Pago Hasta</label>
+                            <input type="date" class="form-control" name="fecha_de_pago_hasta" value="{{ request.GET.fecha_de_pago_hasta }}" min="2000-01-01" max="2050-01-01">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="tad_id">ID TAD</label>
+                            <input type="text" class="form-control" name="id_tad" value="{{ request.GET.id_tad }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="dominios">Dominio/s</label>
+                            <input type="text" class="form-control" name="dominios" value="{{ request.GET.dominios }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="operation_type">Trámite</label>
+                            <input type="hidden" name="codigo_de_tramite" id="codigo_de_tramite" />
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="codigo-de-tramite-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                Trámite
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="codigo-de-tramite-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="codigo-de-tramite-check-all" name="codigo-de-tramite-check" /> Todos</li>
+                                        {% for o in codigos_de_tramite_enum %}
+                                            <li value="{{ o.id }}" id="{{ o.id }}"><input type="checkbox" name="codigo-de-tramite-check" value="{{ o.id }}" {% if o.id in request.GET.codigo_de_tramite %}checked{% endif %} /> {{ o.name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="numero_de_factura">Nro. de Factura</label>
+                            <input type="text" class="form-control" name="numero_de_factura" value="{{ request.GET.numero_de_factura }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="estado_en_sir">Estado en SIR</label>
+                            <input type="hidden" name="estado_en_sir" id="estado_en_sir" />
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="estado-en-sir-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                Estado en SIR
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="estado-en-sir-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="estado-en-sir-check-all" name="estado-en-sir-check" value="todos" /> Todos</li>                                       
+                                        <li id="estado-en-sir-check"><input type="checkbox" name="estado-en-sir-check" value="PAGO"/> PAGO</li>
+                                        <li id="estado-en-sir-check"><input type="checkbox" name="estado-en-sir-check" value="IMPAGO"/> IMPAGO</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group col-md-8">
+                            <label for="monto">Monto:</label><br>
+                            <label id="monto-label"></label>
+                            <input type="hidden" name="monto_desde" id="monto_desde" value="{% if request.GET.monto_desde %}{{ request.GET.monto_desde }}{% else %}0{% endif %}" />
+                            <input type="hidden" name="monto_hasta" id="monto_hasta" value="{% if request.GET.monto_hasta %}{{ request.GET.monto_hasta }}{% else %}10000{% endif %}" />
+                            <div id="slider-range"></div>
+                        </div>                     
+                    </div>
+
+                    <div class="formbuilder-select form-group field-select-1646413469641">
+                        <button class="btn btn-secondary" id="btn-clean-filters" type="button">Limpiar filtros</button>
+                        <button class="btn btn-primary" type="submit" id="btn-filtrar">Filtrar</button>
+                        <button class="btn btn-primary" type="submit" id="btn-exportar">Exportar</button>
+                        <input type="text" hidden name="exportar_hidden" id="exportar_hidden" value="" />
+                        
+                    </div>
+
+                </div>
+            </div>
+        </form>
+        <!-- Filters End -->
+        <div class="row">
+            <div class="card-body">             
+                <div class="table-responsive">
+                    {% if paginator.object_list|length > 0%}
+                        <table class="table table-bordered" width="100%" cellspacing="0" id="decidir-data">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Transacción</th>
+                                    <th scope="col">Fecha de pago</th>
+                                    <th scope="col">Monto</th>
+                                    <th scope="col">Medio de Pago</th>
+                                    <th scope="col">ID TAD</th>
+                                    <th scope="col">Dominio/s</th>
+                                    <th scope="col">Trámite</th>
+                                    <th scope="col">Factura</th>
+                                    <th scope="col">Estado en SIR</th>
+                                    <th scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in paginator.object_list %}
+                                    <tr>
+                                        <td>{{ line.transaccion }}</td>
+                                        <td>{{ line.fecha_de_pago|date:"d/m/Y H:i:s" }}</td>
+                                        <td>${{ line.monto }}</td>
+                                        <td>{{ line.medio_de_pago }}</td>
+                                        <td>{{ line.id_tad }}</td>
+                                        <td>{{ line.dominios }}</td>
+                                        <td>{{ line.codigo_de_tramite.name }}</td>
+                                        <td>{{ line.numero_de_factura }}</td>
+                                        <td align="center">
+                                            {% if  line.estado_en_sir %} 
+                                                <p class="text-success">PAGO</p>
+                                            {%else%}
+                                                <p class="text-danger">IMPAGO</IMPAGO</p>
+                                            {% endif %}
+                                        </td>
+                                        <td><a href="" data-target="#detail-modal" data-toggle="modal" onclick="open_modal({{ line.id }})" title="Ver más información"><i class="fa fa-info-circle"></i></a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+
+                {% include '../paginator.html' %}
+                {% include './detail_modal.html' %}
+
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+        
+    {% block javascript %}
+
+
+         function parse_date(date){
+
+            let d = new Date(date);
+            let day = ('00' + d.getDate()).slice(-2);
+            let month = ('00' + parseInt(d.getMonth() + 1)).slice(-2);
+            let hours = ('00' + d.getUTCHours()).slice(-2);
+            let minutes = ('00' + d.getMinutes()).slice(-2);
+            return day + '/' + month + '/' + d.getFullYear() + ' ' + hours + ':' + minutes;
+        }
+
+
+       
+         function open_modal(id){
+            $.ajax({
+                'url': '/app/conciliaciones/'+id+'/',
+                'method': 'get',
+                'success': function(result){
+
+                    let fecha_de_pago = parse_date(result.fecha_de_pago)
+
+                    $('#modal-title-label').html(result.transaccion);
+                    $('#modal-transaccion-label').html(result.transaccion);
+                    $('#modal-medio-de-pago-label').html(result.medio_de_pago);
+                    $('#modal-monto-label').html('$'+result.monto);
+                    $('#modal-token-label').html(result.token);
+                    $('#modal-id-tad-label').html(result.id_tad);
+                    $('#modal-fecha-de-pago-label').html(fecha_de_pago);
+                    $('#modal-dominios-label').html(result.dominios);
+                    $('#modal-tramite-label').html(result.tramite);
+                    $('#modal-numero-de-factura-label').html(result.numero_de_factura);
+                    $('#modal-estado-en-sir-label').html(result.estado_en_sir);
+                }
+            });
+        }
+
+            $(document).ready(function() {
+
+                $('#btn-filtrar').click(function () {
+                    $('#exportar_hidden').val('filtrar');
+                });
+
+                $('#btn-exportar').click(function () {
+                    $('#exportar_hidden').val('exportar');
+                });
+
+
+                $('#btn-clean-filters').click(function () {
+                    window.location.href = '?';
+                });
+
+                
+                $('input[name=estado-en-sir-check]').click(function(){
+
+                    var estado_en_sir = '';
+
+
+                    if($(this).prop('id') == 'estado-en-sir-check-all'){
+                        if($('#estado-en-sir-check-all').prop('checked')){
+                            $('input[name=estado-en-sir-check]').prop('checked', 'checked');
+                        }else{
+
+                            $('input[type=checkbox]').prop('checked', '');
+                            $('input[name=estado-en-sir-check]').removeProp('checked');
+                        }
+                    }
+
+                    $('input[name=estado-en-sir-check]').each(function(){
+
+                            if($(this).prop('checked')){
+
+                                if(estado_en_sir != ''){
+                                    estado_en_sir += ',';
+                                }
+                                estado_en_sir += $(this).val();
+                            }
+                        });
+
+                    $('#estado_en_sir').val(estado_en_sir);
+                });
+
+                $('input[name=medio-de-pago-check]').click(function(){
+
+                    var medio_de_pago = '';
+
+
+                    if($(this).prop('id') == 'medio-de-pago-check-all'){
+                        if($('#medio-de-pago-check-all').prop('checked')){
+                            $('input[name=medio-de-pago-check]').prop('checked', 'checked');
+                        }else{
+
+                            $('input[type=checkbox]').prop('checked', '');
+                            $('input[name=medio-de-pago-check]').removeProp('checked');
+                        }
+                    }
+
+                    $('input[name=medio-de-pago-check]').each(function(){
+
+                            if($(this).prop('checked')){
+
+                                if(medio_de_pago != ''){
+                                    medio_de_pago += ',';
+                                }
+                                medio_de_pago += $(this).val();
+                            }
+                        });
+
+                    $('#medio_de_pago').val(medio_de_pago);
+                });
+
+                $('input[name=codigo-de-tramite-check]').click(function(){
+
+                    var codigo_de_tramite = '';
+
+
+                    if($(this).prop('id') == 'codigo-de-tramite-check-all'){
+                        if($('#codigo-de-tramite-check-all').prop('checked')){
+                            $('input[name=codigo-de-tramite-check]').prop('checked', 'checked');
+                        }else{
+
+                            $('input[name=codigo-de-tramite-check]').prop('checked', '');
+                            $('input[name=codigo-de-tramite-check]').removeProp('checked');
+                        }
+                    }
+
+                    $('input[name=codigo-de-tramite-check]').each(function(){
+
+                            if($(this).prop('checked')){
+
+                                if(codigo_de_tramite != ''){
+                                    codigo_de_tramite += ',';
+                                }
+                                codigo_de_tramite += $(this).val();
+                            }
+                        });
+
+                    $('#codigo_de_tramite').val(codigo_de_tramite);
+                });
+
+                $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+                $( "#slider-range" ).slider({
+                    range: true,
+                    min: 0,
+                    max: 10000,
+                    values: [ $('#monto_desde').val(), $('#monto_hasta').val() ],
+                    slide: function( event, ui ) {
+                        $('#monto_desde').val(ui.values[0]);
+                        $('#monto_hasta').val(ui.values[1]);
+                        $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+
+                    }
+                });
+            });
+
+    {% endblock %}

@@ -1,0 +1,391 @@
+{% extends '../base.html' %}
+
+{% block titulos %}
+    SIR
+{% endblock %}
+
+{% block content %}
+
+    {% include '../alert.html' %}
+
+    <div class="card shadow mb-4">
+        <!-- Filters -->
+        <form id="frm-filter-decidir" method="get">
+            <div class="card-header py-3">
+                <div class="rendered-form">
+                    <div class="">
+                        <!--<a class="btn btn-primary" access="false" data-toggle="collapse" href="#collapseFiltros" >Filtros</a>-->
+                        <h1 class="h3 mb-4 text-gray-800">Filtros</h1>
+                    </div>
+                    <!--<div class="collapse" id="collapseFiltros">-->
+                        <div class="row">
+                            <div class="form-group col-md-3">
+                                <label for="transaccion">Transacción</label>
+                                <input type="text" class="form-control" name="transaccion" id="transaccion" value="{{ request.GET.transaccion }}">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="medio_de_pago">Medio de Pago</label>
+                                <input type="hidden" name="medio_de_pago" id="medio_de_pago" />
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="medio-de-pago-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                    Medio de Pago
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="medio-de-pago-button" style="width: 100%">
+                                        <ul>
+                                            <li value=""><input type="checkbox" id="medio-de-pago-check-all" name="medio-de-pago-check"/> Todos</li>
+                                            {% for p in medios_de_pago %}
+                                                <li value="{{ p.medio_de_pago }}" id="{{ p.medio_de_pago }}"><input type="checkbox" name="medio-de-pago-check" value="{{ p.medio_de_pago }}" {% if p.medio_de_pago in request.GET.medio_de_pago %}checked{% endif %} /> {{ p.medio_de_pago }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="dominio">Dominio</label>
+                                <input type="text" class="form-control" name="dominio" id="dominio" value="{{ request.GET.dominio }}">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="medio_de_pago">Tipo de Trámite</label>
+                                <input type="hidden" name="tipo_de_tramite" id="tipo_de_tramite" />
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="tipo-de-tramite-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                    Tipo de Trámite
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="tipo-de-tramite-button" style="width: 100%">
+                                        <ul>
+                                            <li value=""><input type="checkbox" id="tipo-de-tramite-check-all" name="tipo-de-tramite-check"/> Todos</li>
+                                            {% for value in tipos_de_tramite %}
+                                                <li value="{{ value.id }}" id="{{ value.id }}"><input type="checkbox" name="tipo-de-tramite-check" value="{{ value.id }}" {% if value.id in request.GET.tipo_de_tramite %}checked{% endif %} /> {{ value.name }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-3 date">
+                                <label for="fecha-de-pago-desde">Fecha de Pago Desde</label>
+                                <input type="date" class="form-control" name="fecha_de_pago_desde" id="fecha-de-pago-desde" value="{{ request.GET.fecha_de_pago_desde }}" min="2000-01-01" max="2050-01-01">
+                            </div>
+                            <div class="form-group col-md-3 date">
+                                <label for="fecha-de-pago-hasta">Fecha de Pago Hasta</label>
+                                <input type="date" class="form-control" name="fecha_de_pago_hasta" id="fecha-de-pago-hasta" value="{{ request.GET.fecha_de_pago_hasta }}" min="2000-01-01" max="2050-01-01">
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label for="estado_en_sir">Estado en SIR</label>
+                                <input type="hidden" name="estado_en_sir" id="estado_en_sir" />
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="estado-en-sir-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                    Estado en SIR
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="estado-en-sir-button" style="width: 100%">
+                                        <ul>
+                                            <li value=""><input type="checkbox" id="estado-en-sir-check-all" name="estado-en-sir-check" /> Todos</li>                                       
+                                            <li id="estado-en-sir-check"><input type="checkbox" name="estado-en-sir-check" value="PAGO"/> TRUE</li>
+                                            <li id="estado-en-sir-check"><input type="checkbox" name="estado-en-sir-check" value="IMPAGO"/> FALSE</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="matched-check">REGISTROS PAGOS/IMPAGOS</label>
+                                <input type="hidden" name="matched" id="matched"/>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="matched-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                        REGISTROS
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="matched-button" style="width: 100%">
+                                        <ul>
+                                            <li value=""><input type="checkbox" id="matched-check-all" name="matched-check"/> Todos</li>
+                                            <li id="matched-check"><input type="checkbox" name="matched-check" value="False"/> FALSE</li>
+                                            <li id="matched-check"><input type="checkbox" name="matched-check" value="True"/> TRUE</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-2"><br>
+                                <label for="monto">Monto:</label>
+                                <label id="monto-label"></label>
+                                <input type="hidden" name="monto_desde" id="monto_desde" value="{% if request.GET.monto_desde %}{{ request.GET.monto_desde }}{% else %}0{% endif %}" />
+                                <input type="hidden" name="monto_hasta" id="monto_hasta" value="{% if request.GET.monto_hasta %}{{ request.GET.monto_hasta }}{% else %}10000{% endif %}" />
+
+                                <div id="slider-range"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+                            <button class="btn btn-secondary" id="btn-clean-filters" type="button"><i class="fa fa-broom"></i> Limpiar filtros</button>
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-filter"></i> Filtrar</button>
+                            <button class="btn btn-primary" type="submit" id="btn-exportar">Exportar</button>
+                            <input type="text" hidden name="exportar_hidden" id="exportar_hidden" value="" />
+                        </div>
+                    <!--</div>-->
+                </div>
+            </div>
+        </form>
+        <!-- Filters End -->
+        <div class="row">
+            <div class="card-body">
+                <div class="table-responsive">
+                    {% if paginator.object_list|length > 0%}
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0" id="sir-data">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Transacción</th>
+                                    <th scope="col">Medio de Pago</th>
+                                    <th scope="col">Monto</th>
+                                    <th scope="col">Fecha de Pago</th>
+                                    <th scope="col">Dominio</th>
+                                    <th scope="col">Tipo de Trámite</th>
+                                    <th scope="col">Estado en SIR</th>
+                                    <th scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in paginator.object_list %}
+                                    <tr>
+                                        {% if  line.matched == False %} 
+                                            <td ><span class="color text-danger">*</span></td>
+                                        {%else%}
+                                            <td></td>
+                                        {% endif %}
+                                        <td>{{ line.transaccion }}</td>
+                                        <td>{{ line.medio_de_pago }}</td>
+                                        <td>${{ line.monto }}</td>
+                                        <td>{{ line.fecha_de_pago|date:"d/m/Y H:i:s" }}</td>
+                                        <td>{{ line.dominio }}</td>
+                                        <td>{{ line.codigo_de_tramite.name }}</td>
+                                        <td>{{ line.estado_en_sir }}</td>
+                                        <td><a href="" data-target="#detail-modal" data-toggle="modal" onclick="open_modal({{ line.id}})" title="Ver más información"><i class="fa fa-info-circle"></i></a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+
+                {% include '../paginator.html' %}
+
+                {% include './detail_modal.html' %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+
+
+    function parse_date(date){
+
+        let d = new Date(date);
+        let day = ('00' + d.getDate()).slice(-2);
+        let month = ('00' + parseInt(d.getMonth() + 1)).slice(-2);
+        let hours = ('00' + d.getUTCHours()).slice(-2);
+        let minutes = ('00' + d.getMinutes()).slice(-2);
+        return day + '/' + month + '/' + d.getFullYear() + ' ' + hours + ':' + minutes;
+    }
+
+
+    $(document).ready(function(){
+        $('#btn-clean-filters').click(function(){
+            window.location.href = '?';
+        });
+        
+        $('#btn-exportar').click(function () {
+            $('#exportar_hidden').val('exportar');
+        });
+
+        $('input[name=matched-check]').click(function(){
+
+            var matched = '';
+
+
+            if($(this).prop('id') == 'matched-check-all'){
+                if($('#matched-check-all').prop('checked')){
+                    $('input[name=matched-check]').prop('checked', 'checked');
+                }else{
+
+                    $('input[type=checkbox]').prop('checked', '');
+                    $('input[name=matched-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=matched-check]').each(function(){
+
+                    if($(this).prop('checked')){
+
+                        if(matched != ''){
+                            matched += ',';
+                        }
+                        matched += $(this).val();
+                    }
+                });
+
+            $('#matched').val(matched);
+        });
+
+
+
+
+
+        $('input[name=estado-en-sir-check]').click(function(){
+
+            var estado_en_sir = '';
+
+
+            if($(this).prop('id') == 'estado-en-sir-check-all'){
+                if($('#estado-en-sir-check-all').prop('checked')){
+                    $('input[name=estado-en-sir-check]').prop('checked', 'checked');
+                }else{
+
+                    $('input[type=checkbox]').prop('checked', '');
+                    $('input[name=estado-en-sir-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=estado-en-sir-check]').each(function(){
+
+                    if($(this).prop('checked')){
+
+                        if(estado_en_sir != ''){
+                            estado_en_sir += ',';
+                        }
+                        estado_en_sir += $(this).val();
+                    }
+                });
+
+            $('#estado_en_sir').val(estado_en_sir);
+        });
+
+
+        $('input[name=medio-de-pago-check]').click(function(){
+
+            var medio_de_pago = '';
+
+            if($(this).prop('id') == 'medio-de-pago-check-all'){
+                 if($('#medio-de-pago-check-all').prop('checked')){
+                    $('input[name=medio-de-pago-check]').prop('checked', 'checked');
+                }else{
+                    $('input[name=medio-de-pago-check]').prop('checked', '');
+                }
+            }
+
+            $('input[name=medio-de-pago-check]').each(function(){
+
+                    if($(this).prop('checked')){
+                        if(medio_de_pago != ''){
+                            medio_de_pago += ',';
+                        }
+                        medio_de_pago += $(this).val();
+                    }
+                });
+
+            $('#medio_de_pago').val(medio_de_pago);
+        });
+
+        $('input[name=estado-de-pago-check]').click(function(){
+
+            var estado_de_pago = '';
+
+            if($(this).prop('id') == 'estado-de-pago-check-all'){
+                 if($('#estado-de-pago-check-all').prop('checked')){
+                    $('input[name=estado-de-pago-check]').prop('checked', 'checked');
+                }else{
+                    $('input[name=estado-de-pago-check]').prop('checked', '');
+                }
+            }
+
+            $('input[name=estado-de-pago-check]').each(function(){
+
+                    if($(this).prop('checked')){
+                        if(estado_de_pago != ''){
+                            estado_de_pago += ',';
+                        }
+                        estado_de_pago += $(this).val();
+                    }
+                });
+
+            $('#estado_de_pago').val(estado_de_pago);
+        });
+
+
+        $('input[name=tipo-de-tramite-check]').click(function(){
+
+            var tipo_de_tramite = '';
+
+            if($(this).prop('id') == 'tipo-de-tramite-check-all'){
+                 if($('#tipo-de-tramite-check-all').prop('checked')){
+                    $('input[name=tipo-de-tramite-check]').prop('checked', 'checked');
+                }else{
+                    $('input[name=tipo-de-tramite-check]').prop('checked', '');
+                }
+            }
+
+            $('input[name=tipo-de-tramite-check]').each(function(){
+
+                    if($(this).prop('checked')){
+                        if(tipo_de_tramite != ''){
+                            tipo_de_tramite += ',';
+                        }
+                        tipo_de_tramite += $(this).val();
+                    }
+                });
+
+            $('#tipo_de_tramite').val(tipo_de_tramite);
+        });
+
+        $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+        $( "#slider-range" ).slider({
+            range: true,
+            min: 0,
+            max: 10000,
+            values: [ $('#monto_desde').val(), $('#monto_hasta').val() ],
+            slide: function( event, ui ) {
+                $('#monto_desde').val(ui.values[0]);
+                $('#monto_hasta').val(ui.values[1]);
+                $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+
+            }
+        });
+    });
+
+    function parse_date(date){
+
+        let d = new Date(date);
+        let day = ('00' + d.getDate()).slice(-2);
+        let month = ('00' + parseInt(d.getMonth() + 1)).slice(-2);
+        let hours = ('00' + d.getUTCHours()).slice(-2);
+        let minutes = ('00' + d.getMinutes()).slice(-2);
+        return day + '/' + month + '/' + d.getFullYear() + ' ' + hours + ':' + minutes;
+    }
+
+    function open_modal(id){
+        $.ajax({
+            'url': '/app/sir/'+id+'/',
+            'method': 'get',
+            'success': function(result){
+
+                fecha_de_pago = parse_date(result.fecha_de_pago);
+                
+                $('#modal-title-label').html(result.transaccion);
+                $('#modal-transaccion-label').html(result.transaccion);
+                $('#modal-medio-de-pago-label').html(result.medio_de_pago);
+                $('#modal-monto-label').html('$'+result.monto);
+                $('#modal-fecha-de-pago-label').html(fecha_de_pago);
+                $('#modal-estado-en-sir-label').html(result.estado_en_sir);
+                $('#modal-dominio-label').html(result.dominio);
+                $('#modal-cantidad-de-dominios-label').html(result.cantidad_de_dominios);
+                $('#modal-id-tad-label').html(result.id_tad);
+                $('#modal-codigo-de-tramite-label').html(result.codigo_de_tramite);
+                $('#modal-tipo-de-tramite-label').html(result.tipo_de_tramite);
+                $('#modal-numero-de-factura-label').html(result.numero_de_factura.toString(0));
+            }
+        });
+    }
+
+
+{% endblock %}

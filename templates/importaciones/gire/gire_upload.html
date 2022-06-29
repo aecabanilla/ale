@@ -1,0 +1,51 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block titulos %}
+    IMPORTAR ARCHIVO GIRE
+{% endblock %}
+
+{% block content %}
+
+    <form enctype="multipart/form-data" method="post">{% csrf_token %}
+        <div class="row">
+            {% if show_alert %}
+                <div class="alert alert-{{ alert_type }}" role="alert" style="width:100%">
+                    {{ message }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="row">
+           <div class="input-group mb-3">
+               {% if alert_type != 'warning' %}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="label-archivo">Archivo</span>
+                    </div>
+                    <input type="file" class="form-control" name="gire_file" id="inputFile" aria-describedby="label-archivo1" />
+               {% endif %}
+            </div>
+        </div>
+
+        {% include '../spinner.html' %}
+
+        <div class="row">
+            <div class="col-md-12">
+                {% if alert_type != 'warning' %}
+                    <input class="btn btn-primary" id="btn-subir" type="submit" name="subir" value="Subir" />
+                {% endif %}
+                {% if alert_type == 'warning' %}
+                    <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+                    <input class="btn btn-secondary" type="submit" name="cancelar" value="Cancelar" />
+                    <input class="btn btn-primary" type="submit" name="confirmar" value="Confirmar" />
+                {% endif %}
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block javascript %}
+
+    $('#btn-subir').click(function(){
+        $('#spinner-div').removeClass('d-none');
+    });
+
+{% endblock %}

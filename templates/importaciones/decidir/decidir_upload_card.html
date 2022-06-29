@@ -1,0 +1,93 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block titulos %}
+    IMPORTAR ARCHIVO DECIDIR TARJETAS
+{% endblock %}
+
+{% block content %}
+
+    <form enctype="multipart/form-data" method="post">{% csrf_token %}
+
+        {% include '../alert.html' %}
+
+        <div class="row" style="width: 50%">
+            {% if alert_type != 'warning' %}
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="label-tarjeta">Tarjeta</span>
+                    </div>
+
+                    <select class="form-control" id="tarjeta_select" name="tarjeta_select">
+                        {% for tarjeta in tarjetas %}
+                            <option value="{{ tarjeta }}" {% if request.POST.tarjeta_select == tarjeta  %}selected{% endif %}>{{ tarjeta }}</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+                <div class="input-group mb-3" id="lote-div">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="label-lote">Lote</span>
+                    </div>
+                    <input type="text" class="form-control" name="lote" id="lote" placeholder="Lote" value="{{ request.POST.lote }}" />
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="label-archivo">Archivo</span>
+                    </div>
+
+                    <input type="file" class="form-control" name="decidir_file" id="inputFile" aria-describedby="label-archivo1" />
+
+                </div>
+            {% endif %}
+
+        </div>
+
+        {% include '../spinner.html' %}
+
+        <div class="row">
+            <div class="col-md-12">
+                {% if alert_type != 'warning' %}
+                    <button class="btn btn-primary" id="btn-subir" type="submit" name="subir">Subir</button>
+                {% endif %}
+                {% if alert_type == 'warning' %}
+                    <input type="hidden" name="lote" value="{{ request.POST.lote }}" />
+                    <input type="hidden" name="timestamp" id="timestamp" value="{{ timestamp }}" />
+                    <button class="btn btn-secondary" type="submit" name="cancelar">Cancelar</button>
+                    <button class="btn btn-primary" type="submit" name="confirmar">Confirmar</button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
+{% block javascript %}
+
+    $('#btn-subir').click(function(){
+        $('#spinner-div').removeClass('d-none');
+    });
+
+    function show_hide_lote(option){
+
+        if(option == 'Visa' || option == 'Amex' || option == ''){
+            $('#lote-div').show();
+        }else{
+            $('#lote').val('');
+            $('#lote-div').hide();
+        }
+    }
+
+    show_hide_lote('{{  request.POST.tarjeta_select }}');
+
+    $('#tarjeta_select').change(function(){
+
+        let option = $(this).val();
+
+        show_hide_lote(option);
+
+    });
+
+
+{% endblock %}

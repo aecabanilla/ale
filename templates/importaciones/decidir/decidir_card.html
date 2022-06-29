@@ -1,0 +1,328 @@
+{% extends '../base.html' %}
+
+{% block titulos %}
+    DECIDIR TARJETAS
+{% endblock %}
+
+{% block content %}
+
+    {% include '../alert.html' %}
+
+    <div class="card shadow mb-4">
+        <!-- Filters -->
+        <form id="frm-filter-decidir" method="get">
+            <div class="card-header py-3">
+                <div class="rendered-form">
+                    <div class="">
+                        <h1 access="false">Filtros</h1>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="id_operacion">ID Operación</label>
+                            <input type="text" class="form-control" name="id_operacion" access="false" id="id_operacion" value="{{ request.GET.id_operacion }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="titular">Titular</label>
+                            <input type="text" class="form-control" name="titular" access="false" id="titular" value="{{ request.GET.titular }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="estado">Estado Cierre</label>
+                            <input type="hidden" name="estado_cierre" id="estado_cierre" value="{{ request.GET.estado_cierre }}" />
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="estado-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                Estado
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="tarjeta-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="estado-cierre-check-all" name="estado-cierre-check" />Todas</li>
+                                        {% for status in status_list %}
+                                            <li value="{{ status.estado_cierre }}" id="{{ status.estado_cierre }}"><input type="checkbox" name="estado-cierre-check" value="{{ status.estado_cierre }}" {% if status.estado_cierre in request.GET.estado_cierre %}checked{% endif %} /> {{ status.estado_cierre }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="tarjeta">Tarjeta</label>
+                            <input type="hidden" name="tarjeta" id="tarjeta" value="{{ request.GET.tarjeta }}" />
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="tarjeta-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                Tarjeta
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="tarjeta-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="tarjeta-check-all" name="tarjeta-check" value="{{ card.tarjeta }}" />Todas</li>
+                                        {% for card in card_list %}
+                                            <li value="{{ card.tarjeta }}" id="{{ card.tarjeta }}"><input type="checkbox" name="tarjeta-check" value="{{ card.tarjeta }}" {% if card.tarjeta in request.GET.tarjeta %}checked{% endif %} /> {{ card.tarjeta }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="fecha_desde">Fecha desde</label>
+                            <input type="date" class="form-control" name="fecha_desde" access="false" id="fecha_desde" value="{{ request.GET.fecha_desde }}" min="2000-01-01" max="2050-01-01">
+                        </div>
+                        <div class="form-group col-md-3 date">
+                            <label for="fecha_hasta">Fecha hasta</label>
+                            <input type="date" class="form-control" name="fecha_hasta"  access="false" id="fecha_hasta" value="{{ request.GET.fecha_hasta }}" min="2000-01-01" max="2050-01-01">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="motivo">Motivo</label>
+                            <input type="text" class="form-control" name="motivo" access="false" id="motivo" value="{{ request.GET.motivo }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="lote">Lote</label>
+                            <input type="text" class="form-control" name="lote" id="lote" value="{{ request.GET.lote }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-2">
+                            <label for="matched-check">REGISTROS en SIR</label>
+                            <input type="hidden" name="matched" id="matched"/>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle custom-dropdown-button" type="button" id="matched-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                                    REGISTROS
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="matched-button" style="width: 100%">
+                                    <ul>
+                                        <li value=""><input type="checkbox" id="matched-check-all" name="matched-check"/> Todos</li>
+                                        <li id="matched-check"><input type="checkbox" name="matched-check" value="False" /> SIN REGISTRO</li>
+                                        <li id="matched-check"><input type="checkbox" name="matched-check" value="True"/> CON REGISTRO</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="monto">Monto:</label>
+                            <label id="monto-label"></label>
+                            <input type="hidden" name="monto_desde" id="monto_desde" value="{% if request.GET.monto_desde %}{{ request.GET.monto_desde }}{% else %}0{% endif %}" />
+                            <input type="hidden" name="monto_hasta" id="monto_hasta" value="{% if request.GET.monto_hasta %}{{ request.GET.monto_hasta }}{% else %}10000{% endif %}" />
+                            <div id="slider-range"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="formbuilder-select form-group">
+                        <button class="btn btn-secondary" id="btn-clean-filters" type="button"><i class="fa fa-broom"></i> Limpiar filtros</button>
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-filter"></i> Filtrar</button>
+                        <button class="btn btn-primary" type="submit" id="btn-exportar">Exportar</button>
+                        <input type="text" hidden name="exportar_hidden" id="exportar_hidden" value="" />
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- Filters End -->
+        <div class="row">
+            <div class="card-body">
+                <div class="table-responsive">
+                    {% if paginator.object_list|length > 0%}
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0" id="decidir-data">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">ID Operación</th>
+                                    <th scope="col">Titular</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Estado Cierre</th>
+                                    <th scope="col">Motivo</th>
+                                    <th scope="col">Tarjeta</th>
+                                    <th scope="col">Monto</th>
+                                    <th scope="col">SIR</th>
+                                    <th scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for value in paginator.object_list %}
+                                    <tr>
+                                        {% if  value.matched == False %} 
+                                            <td ><span class="color text-danger">*</span></td>
+                                        {%else%}
+                                            <td></td>
+                                        {% endif %}
+                                        <td>{{ value.id_operacion }}</td>
+                                        <td>{{ value.titular }}</td>
+                                        <td>{{ value.fecha_original|date:"d/m/Y H:i:s" }}</td>
+                                        <td>{{ value.estado_cierre }}</td>
+                                        <td>{{ value.motivo }}</td>
+                                        <td>{{ value.tarjeta }}</td>
+                                        <td>${{ value.monto }}</td>
+                                        <td>{{ value.matched }}</td>
+                                        <td><a href="" data-target="#detail-modal" data-toggle="modal" onclick="open_modal({{ value.id }})" title="Ver más información"><i class="fa fa-info-circle"></i></a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+
+                {% include '../paginator.html' %}
+
+                {% include './detail_modal_card.html' %}
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+
+    function parse_date(date){
+
+        let d = new Date(date);
+        let day = ('00' + d.getDate()).slice(-2);
+        let month = ('00' + parseInt(d.getMonth() + 1)).slice(-2);
+        let hours = ('00' + d.getUTCHours()).slice(-2);
+        let minutes = ('00' + d.getMinutes()).slice(-2);
+        return day + '/' + month + '/' + d.getFullYear() + ' ' + hours + ':' + minutes;
+    }
+
+    function open_modal(id){
+        $.ajax({
+            'url': '/app/decidir_card/'+id+'/',
+            'method': 'get',
+            'success': function(result){
+
+                let fecha_cierre = parse_date(result.fecha_cierre);
+                let fecha_original = parse_date(result.fecha_original);
+
+                $('#modal-title-label').html(result.id_operacion);
+                $('#modal-id-operacion-label').html(result.id_operacion);
+                $('#modal-titular-label').html(result.titular);
+                $('#modal-fecha-cierre-label').html(fecha_cierre);
+                $('#modal-fecha-original-label').html(fecha_original);
+                $('#modal-estado-cierre-label').html(result.estado_cierre);
+                $('#modal-autent-externa-label').html(result.autent_externa);
+                $('#modal-motivo-label').html((result.motivo.trim() != ''?result.motivo:'-'));
+                $('#modal-tarjeta-label').html(result.tarjeta);
+                $('#modal-monto-label').html('$'+result.monto);
+                $('#modal-cuotas-label').html(result.cuotas);
+                $('#modal-site-label').html(result.site);
+                $('#modal-cod-aut-label').html(result.cod_aut);
+                $('#modal-nro-tarjeta-label').html(result.nro_tarjeta);
+                $('#modal-validacion-domicilio-label').html(result.validacion_domicilio);
+                $('#modal-validacion-titular-label').html((result.validacion_titular?result.validacion_titular:'-' ));
+                $('#modal-email-label').html((result.email?result.email:'-'));
+                $('#modal-lote-label').html((result.lote?result.lote:'-' ));
+                $('#modal-estado-cierre-label').html((result.estado_cierre?result.estado_cierre:'-'));
+                $('#modal-fecha-vto-cuota-1-label').html((result.fecha_vto_cuota_1?result.fecha_vto_cuota_1:'-'));
+
+
+            }
+        });
+    }
+
+    $(document).ready(function(){
+
+        $('#btn-clean-filters').click(function(){
+            window.location.href = '?';
+        });
+
+        $('#btn-exportar').click(function () {
+            $('#exportar_hidden').val('exportar');
+        });
+
+        $('input[name=matched-check]').click(function(){
+
+            var matched = '';
+
+
+            if($(this).prop('id') == 'matched-check-all'){
+                if($('#matched-check-all').prop('checked')){
+                    $('input[name=matched-check]').prop('checked', 'checked');
+                }else{
+
+                    $('input[type=checkbox]').prop('checked', '');
+                    $('input[name=matched-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=matched-check]').each(function(){
+
+                    if($(this).prop('checked')){
+
+                        if(matched != ''){
+                            matched += ',';
+                        }
+                        matched += $(this).val();
+                    }
+                });
+
+            $('#matched').val(matched);
+        });
+
+        $('input[name=estado-cierre-check]').click(function(){
+
+            var estado_cierre = '';
+
+
+            if($(this).prop('id') == 'estado-cierre-check-all'){
+                 if($('#estado-cierre-check-all').prop('checked')){
+                    $('input[name=estado-cierre-check]').prop('checked', 'checked');
+                }else{
+                    $('input[name=estado-cierre-check]').prop('checked', '');
+                    $('input[name=estado-cierre-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=estado-cierre-check]').each(function(){
+
+                    if($(this).prop('checked')){
+                        if(estado_cierre != ''){
+                            estado_cierre += ',';
+                        }
+                        estado_cierre += $(this).val();
+                    }
+                });
+
+            $('#estado_cierre').val(estado_cierre);
+        });
+
+        $('input[name=tarjeta-check]').click(function(){
+
+            var tarjeta = '';
+
+
+            if($(this).prop('id') == 'tarjeta-check-all'){
+                 if($('#tarjeta-check-all').prop('checked')){
+                    $('input[name=tarjeta-check]').prop('checked', 'checked');
+                }else{
+
+                    $('input[name=tarjeta-check]').prop('checked', '');
+                    $('input[name=tarjeta-check]').removeProp('checked');
+                }
+            }
+
+            $('input[name=tarjeta-check]').each(function(){
+
+                    if($(this).prop('checked')){
+                        if(tarjeta != ''){
+                            tarjeta += ',';
+                        }
+                        tarjeta += $(this).val();
+                    }
+                });
+
+            $('#tarjeta').val(tarjeta);
+        });
+
+        $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+        $( "#slider-range" ).slider({
+            range: true,
+            min: 0,
+            max: 10000,
+            values: [ $('#monto_desde').val(), $('#monto_hasta').val() ],
+            slide: function( event, ui ) {
+                $('#monto_desde').val(ui.values[0]);
+                $('#monto_hasta').val(ui.values[1]);
+                $('#monto-label').html( "$" + $('#monto_desde').val() + " - $" + $('#monto_hasta').val() );
+
+
+            }
+        });
+    });
+{% endblock %}

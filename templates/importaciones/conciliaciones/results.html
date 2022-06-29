@@ -1,0 +1,85 @@
+{% extends '../base.html' %}
+
+{% block titulos %}
+    RESULTADOS
+{% endblock %}
+
+{% block content %}
+
+    {% include '../alert.html' %}
+
+    <div class="card shadow mb-4">
+        <!-- Filters -->
+        <form id="frm-filter-decidir" method="get">
+            <div class="card-header py-3">
+                <div class="rendered-form">
+                    <div class="">
+                        <h1 access="false">Filtros</h1>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="year">Año</label>
+                            <select name="year" class="form-control">
+                                {% for value in years %}
+                                    <option value="{{ value }}" {% if value|stringformat:"s" == request.GET.year %}selected{% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="month">Mes</label>
+                            <select name="month" class="form-control">
+                                {% for key, value in months.items %}
+                                    <option value="{{ key }}" {% if key == request.GET.month %}selected{% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-filter"></i> Filtrar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- Filters End -->
+        <div class="row">
+            <div class="card-body">
+                <div class="row">
+                {% if results.count > 0 %}
+                    {% for r in results %}
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Resultados {% for k, v in months.items %}{% if k|stringformat:"s" == r.month|stringformat:"i" %}{{ v }}{% endif %}{% endfor %} {{ r.year }} - {{ r.payment_method }}</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ r.amount }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-12">
+                        <h4>NO HAY RESULTADOS PARA MOSTRAR</h4>
+                    </div>
+                {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+
+    $(document).ready(function() {
+        $('#btn-clean-filters').click(function () {
+            window.location.href = '?';
+        });
+    });
+
+{% endblock %}
